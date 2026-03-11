@@ -5,24 +5,23 @@
  * Uses a fixed left sidebar and main content area on the right.
  */
 
-// Include header (opens <body>)
-include 'includes/header.php';
+// Use __DIR__ to build absolute paths
+include __DIR__ . '/../header.php';
 
-// Include the appropriate role‑based sidebar
+// Include the appropriate role‑based sidebar (located in same folder)
 if (isPatient()) {
-    include 'includes/layout/patient_sidebar.php';
+    include __DIR__ . '/patient_sidebar.php';
 } elseif (isDoctor()) {
-    include 'includes/layout/doctor_sidebar.php';
+    include __DIR__ . '/doctor_sidebar.php';
 } else {
-    // Fallback (e.g., admin) – you can create an admin sidebar later
-    include 'includes/layout/patient_sidebar.php';
+    include __DIR__ . '/patient_sidebar.php'; // fallback
 }
 ?>
 
 <!-- Main Content Area -->
 <div class="main-content" style="margin-left: 250px; padding: 20px;">
-    <?php include 'includes/breadcrumbs.php'; ?>
-    <?php echo $content_html; ?>
+    <?php include __DIR__ . '/../breadcrumbs.php'; ?>
+    <?php echo $content_html ?? ''; ?>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/../footer.php'; ?>
