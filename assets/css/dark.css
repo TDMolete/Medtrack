@@ -1,17 +1,83 @@
+/* ========================================
+   MedTrack – Dark Theme
+   ======================================== */
+
 [data-theme="dark"] {
-    --bg-color: #1e1e2f;
-    --text-color: #e0e0e0;
-    --card-bg: #2d2d44;
-    --sidebar-bg: #252537;
+    --bg-body: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-sidebar: #0f3460;
+    --text-primary: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --border-color: #2a3a4a;
+    --primary: #4a90e2;
+    --primary-dark: #3a7bc8;
 }
+
 [data-theme="dark"] body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--bg-body);
+    color: var(--text-primary);
 }
+
 [data-theme="dark"] .card {
-    background-color: var(--card-bg);
-    color: var(--text-color);
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
 }
+
 [data-theme="dark"] .bg-light {
-    background-color: var(--sidebar-bg) !important;
+    background-color: var(--bg-sidebar) !important;
 }
+
+[data-theme="dark"] .nav-link {
+    color: var(--text-primary);
+}
+[data-theme="dark"] .nav-link:hover {
+    background-color: #2a3a4a;
+}
+[data-theme="dark"] .nav-link.active {
+    background-color: var(--primary);
+    color: white !important;
+}
+
+[data-theme="dark"] .table {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+[data-theme="dark"] .table thead th {
+    background-color: #0f3460;
+}
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: #1e2a3a;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+[data-theme="dark"] .form-control:focus {
+    background-color: #1e2a3a;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+[data-theme="dark"] .dropdown-item {
+    color: var(--text-primary);
+}
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--bg-sidebar);
+}
+
+[data-theme="dark"] .alert-success {
+    background-color: #1e3a2e;
+    color: #a8e6cf;
+    border-color: #2a5a3a;
+}
+[data-theme="dark"] .alert-danger {
+    background-color: #3e2a2a;
+    color: #f8d7da;
+    border-color: #6a2a2a;
+}
+/* Add more overrides as needed */

@@ -1,26 +1,32 @@
 <?php
-require_once '../includes/config/db.php';
-session_start();
-if (!isset($_SESSION['user_id'])) { header("Location: /medtrack/auth/login.php"); exit; }
+require_once '../../includes/config/db.php';
+require_once '../../includes/functions.php';
+redirectIfNotLoggedIn();
+if (!isPatient()) { header("Location: /medtrack/unauthorized.php"); exit; }
 
 $user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ?");
-$stmt->execute([$user_id]);
-$patient = $stmt->fetch();
-$patient_id = $patient['patient_id'];
+$patient_id = getPatientIdByUserId($pdo, $user_id);
 
 // Add medication
+$error = '';
+$success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_med'])) {
-    $name = $_POST['medication_name'];
-    $dosage = $_POST['dosage'];
-    $frequency = $_POST['frequency'];
-    $start = $_POST['start_date'];
-    $end = $_POST['end_date'];
-    $notes = $_POST['notes'];
-    $stmt = $pdo->prepare("INSERT INTO medications (patient_id, medication_name, dosage, frequency, start_date, end_date, notes) VALUES (?,?,?,?,?,?,?)");
-    $stmt->execute([$patient_id, $name, $dosage, $frequency, $start, $end, $notes]);
-    header("Location: medications.php");
-    exit;
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+        $error = "Invalid CSRF token.";
+    } else {
+        $name = trim($_POST['medication_name']);
+        $dosage = trim($_POST['dosage']);
+        $frequency = trim($_POST['frequency']);
+        $start = $_POST['start_date'] ?: null;
+        $end = $_POST['end_date'] ?: null;
+        $notes = trim($_POST['notes']);
+        $stmt = $pdo->prepare("INSERT INTO medications (patient_id, medication_name, dosage, frequency, start_date, end_date, notes) VALUES (?,?,?,?,?,?,?)");
+        if ($stmt->execute([$patient_id, $name, $dosage, $frequency, $start, $end, $notes])) {
+            $success = "Medication added.";
+        } else {
+            $error = "Failed to add medication.";
+        }
+    }
 }
 
 // Fetch medications
@@ -28,18 +34,28 @@ $stmt = $pdo->prepare("SELECT * FROM medications WHERE patient_id = ? ORDER BY e
 $stmt->execute([$patient_id]);
 $meds = $stmt->fetchAll();
 
-include '../includes/header.php';
-include '../includes/sidebar.php';
+ob_start();
 ?>
-<div class="main-content p-4" style="margin-left: 250px;">
+<div class="container-fluid">
     <h2>Medication Schedule</h2>
 
-    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addMedForm">Add Medication</button>
+    <?php if ($error): ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php endif; ?>
+    <?php if ($success): ?>
+        <div class="alert alert-success"><?php echo $success; ?></div>
+    <?php endif; ?>
+
+    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addMedForm">
+        <i class="fas fa-plus"></i> Add Medication
+    </button>
+
     <div class="collapse mb-4" id="addMedForm">
         <div class="card card-body">
             <form method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                 <div class="mb-3">
-                    <label for="medication_name" class="form-label">Medication Name</label>
+                    <label for="medication_name" class="form-label">Medication Name *</label>
                     <input type="text" class="form-control" id="medication_name" name="medication_name" required>
                 </div>
                 <div class="row">
@@ -63,7 +79,7 @@ include '../includes/sidebar.php';
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label for="notes" class="form-label">Additional Notes</label>
+                    <label for="notes" class="form-label">Notes</label>
                     <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
                 </div>
                 <button type="submit" name="add_med" class="btn btn-success">Add</button>
@@ -72,14 +88,14 @@ include '../includes/sidebar.php';
     </div>
 
     <?php if ($meds): ?>
-        <table class="table table-striped">
-            <thead>
+        <table class="table table-striped" id="meds-table">
+            <thead class="table-dark">
                 <tr>
                     <th>Medication</th>
                     <th>Dosage</th>
                     <th>Frequency</th>
-                    <th>Start</th>
-                    <th>End</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
                     <th>Notes</th>
                 </tr>
             </thead>
@@ -100,4 +116,9 @@ include '../includes/sidebar.php';
         <p>No medications added yet.</p>
     <?php endif; ?>
 </div>
-<?php include '../includes/footer.php'; ?>
+<?php
+$content_html = ob_get_clean();
+$page_title = "Medications";
+$current_page = 'medications';
+include '../../includes/layout/layout_selector.php';
+?>

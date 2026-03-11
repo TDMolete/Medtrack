@@ -1,0 +1,129 @@
+/* ========================================
+   MedTrack – Layout Styles
+   ======================================== */
+
+/* ---------- Sidebar (default) ---------- */
+.sidebar {
+    background-color: var(--bg-sidebar);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: width var(--transition-speed);
+    overflow-y: auto;
+    z-index: 1000;
+}
+.sidebar .nav-link {
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+}
+.sidebar .nav-link i {
+    width: 1.5rem;
+    text-align: center;
+}
+.sidebar .nav-link.active {
+    background-color: var(--primary);
+    color: white;
+}
+.sidebar .nav-link:hover:not(.active) {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* ---------- Top Navigation Layout ---------- */
+.topnav {
+    background-color: var(--bg-sidebar);
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.topnav .navbar-brand {
+    font-weight: 700;
+    color: var(--primary);
+}
+.topnav .nav-link {
+    color: var(--text-primary);
+}
+.topnav .nav-link.active {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* ---------- Compact Sidebar ---------- */
+.compact-sidebar {
+    width: var(--compact-sidebar-width);
+    background-color: var(--bg-sidebar);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    text-align: center;
+    padding-top: 1rem;
+}
+.compact-sidebar .nav-link {
+    padding: 0.75rem 0;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+}
+.compact-sidebar .nav-link.active {
+    background-color: var(--primary);
+    color: white;
+}
+.compact-sidebar .nav-link:hover:not(.active) {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* ---------- Breadcrumbs ---------- */
+.breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: var(--text-muted);
+}
+.breadcrumb-item a {
+    color: var(--primary);
+}
+.breadcrumb-item.active {
+    color: var(--text-muted);
+}
+
+/* ---------- Notification Badge ---------- */
+#notif-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 50%;
+    background-color: var(--danger);
+    color: white;
+    position: relative;
+    top: -8px;
+    left: -5px;
+}
+
+/* ---------- Dashboard Stats Cards ---------- */
+.stats-card {
+    border-left: 4px solid var(--primary);
+    transition: all 0.2s;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* ---------- Responsive Adjustments ---------- */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+        opacity: 0;
+        transition: width 0.3s, opacity 0.2s;
+    }
+    .sidebar.show {
+        width: var(--sidebar-width);
+        opacity: 1;
+    }
+    .main-content {
+        margin-left: 0 !important;
+    }
+}

@@ -1,31 +1,28 @@
 <?php
-require_once '../includes/config/db.php';
-session_start();
-if (!isset($_SESSION['user_id'])) { header("Location: /medtrack/auth/login.php"); exit; }
+require_once '../../includes/config/db.php';
+require_once '../../includes/functions.php';
+redirectIfNotLoggedIn();
+if (!isPatient()) { header("Location: /medtrack/unauthorized.php"); exit; }
 
 $user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ?");
-$stmt->execute([$user_id]);
-$patient = $stmt->fetch();
-$patient_id = $patient['patient_id'];
+$patient_id = getPatientIdByUserId($pdo, $user_id);
 
-// Simulate adding a bill (for demo, we can add a form)
+// Handle add bill (demo)
+$error = '';
+$success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_bill'])) {
-    $amount = $_POST['amount'];
-    $issue_date = $_POST['issue_date'];
-    $stmt = $pdo->prepare("INSERT INTO bills (patient_id, amount, issue_date) VALUES (?, ?, ?)");
-    $stmt->execute([$patient_id, $amount, $issue_date]);
-    header("Location: billing.php");
-    exit;
-}
-
-// Mark as paid
-if (isset($_GET['pay'])) {
-    $bill_id = $_GET['pay'];
-    $stmt = $pdo->prepare("UPDATE bills SET status='paid', paid_date=CURDATE() WHERE bill_id=? AND patient_id=?");
-    $stmt->execute([$bill_id, $patient_id]);
-    header("Location: billing.php");
-    exit;
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+        $error = "Invalid CSRF token.";
+    } else {
+        $amount = floatval($_POST['amount']);
+        $issue_date = $_POST['issue_date'];
+        $stmt = $pdo->prepare("INSERT INTO bills (patient_id, amount, issue_date) VALUES (?, ?, ?)");
+        if ($stmt->execute([$patient_id, $amount, $issue_date])) {
+            $success = "Bill added.";
+        } else {
+            $error = "Failed to add bill.";
+        }
+    }
 }
 
 // Fetch bills
@@ -33,17 +30,26 @@ $stmt = $pdo->prepare("SELECT * FROM bills WHERE patient_id = ? ORDER BY issue_d
 $stmt->execute([$patient_id]);
 $bills = $stmt->fetchAll();
 
-include '../includes/header.php';
-include '../includes/sidebar.php';
+ob_start();
 ?>
-<div class="main-content p-4" style="margin-left: 250px;">
+<div class="container-fluid">
     <h2>Billing</h2>
 
-    <!-- Admin-style add bill (for demo) -->
-    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addBillForm">Add Sample Bill</button>
+    <?php if ($error): ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php endif; ?>
+    <?php if ($success): ?>
+        <div class="alert alert-success"><?php echo $success; ?></div>
+    <?php endif; ?>
+
+    <!-- Demo: Add sample bill -->
+    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addBillForm">
+        <i class="fas fa-plus"></i> Add Sample Bill (Demo)
+    </button>
     <div class="collapse mb-4" id="addBillForm">
         <div class="card card-body">
             <form method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                 <div class="mb-3">
                     <label for="amount" class="form-label">Amount (before VAT)</label>
                     <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
@@ -57,9 +63,10 @@ include '../includes/sidebar.php';
         </div>
     </div>
 
+    <!-- Bills table -->
     <?php if ($bills): ?>
-        <table class="table table-bordered">
-            <thead>
+        <table class="table table-bordered" id="bills-table">
+            <thead class="table-dark">
                 <tr>
                     <th>Bill #</th>
                     <th>Issue Date</th>
@@ -73,17 +80,19 @@ include '../includes/sidebar.php';
             </thead>
             <tbody>
                 <?php foreach ($bills as $bill): ?>
-                <tr>
+                <tr id="bill-row-<?php echo $bill['bill_id']; ?>">
                     <td><?php echo $bill['bill_id']; ?></td>
                     <td><?php echo $bill['issue_date']; ?></td>
                     <td>R<?php echo number_format($bill['amount'], 2); ?></td>
                     <td>R<?php echo number_format($bill['vat_amount'], 2); ?></td>
                     <td><strong>R<?php echo number_format($bill['total_amount'], 2); ?></strong></td>
-                    <td><?php echo $bill['status']; ?></td>
-                    <td><?php echo $bill['paid_date'] ?? '-'; ?></td>
+                    <td class="bill-status"><?php echo $bill['status']; ?></td>
+                    <td class="bill-paid-date"><?php echo $bill['paid_date'] ?? '-'; ?></td>
                     <td>
                         <?php if ($bill['status'] == 'unpaid'): ?>
-                            <a href="?pay=<?php echo $bill['bill_id']; ?>" class="btn btn-sm btn-success" onclick="return confirm('Mark as paid?')">Pay Now</a>
+                            <button class="btn btn-sm btn-success pay-bill" data-bill-id="<?php echo $bill['bill_id']; ?>">
+                                <i class="fas fa-credit-card"></i> Pay Now
+                            </button>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -94,4 +103,34 @@ include '../includes/sidebar.php';
         <p>No bills yet.</p>
     <?php endif; ?>
 </div>
-<?php include '../includes/footer.php'; ?>
+
+<script>
+document.querySelectorAll('.pay-bill').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const billId = this.dataset.billId;
+        if (!confirm('Mark this bill as paid?')) return;
+        fetch('/medtrack/api/pay_bill.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'bill_id=' + billId + '&csrf_token=<?php echo generateCSRFToken(); ?>'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById('bill-row-' + billId);
+                row.querySelector('.bill-status').innerText = 'paid';
+                row.querySelector('.bill-paid-date').innerText = data.paid_date;
+                row.querySelector('.pay-bill').remove();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    });
+});
+</script>
+<?php
+$content_html = ob_get_clean();
+$page_title = "Billing";
+$current_page = 'billing';
+include '../../includes/layout/layout_selector.php';
+?>
