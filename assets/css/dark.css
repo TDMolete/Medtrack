@@ -1,0 +1,17 @@
+[data-theme="dark"] {
+    --bg-color: #1e1e2f;
+    --text-color: #e0e0e0;
+    --card-bg: #2d2d44;
+    --sidebar-bg: #252537;
+}
+[data-theme="dark"] body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+[data-theme="dark"] .card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+[data-theme="dark"] .bg-light {
+    background-color: var(--sidebar-bg) !important;
+}

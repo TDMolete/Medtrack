@@ -1,28 +1,39 @@
 <?php
 require_once '../includes/config/db.php';
 session_start();
-
 if (isset($_SESSION['user_id'])) {
-    header("Location: /medtrack/pages/dashboard.php");
+    header("Location: /medtrack/pages/patient/dashboard.php");
     exit;
 }
 
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $csrf_token = $_POST['csrf_token'] ?? '';
 
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-
-    if ($user && password_verify($password, $user['password_hash'])) {
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-        header("Location: /medtrack/pages/dashboard.php");
-        exit;
+    if (!verifyCSRFToken($csrf_token)) {
+        $error = "Invalid security token.";
     } else {
-        $error = "Invalid username or password.";
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+        if ($user && password_verify($password, $user['password_hash'])) {
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+            // Redirect based on role
+            if ($user['role'] === 'patient') {
+                header("Location: /medtrack/pages/patient/dashboard.php");
+            } elseif ($user['role'] === 'doctor') {
+                header("Location: /medtrack/pages/doctor/dashboard.php");
+            } else {
+                header("Location: /medtrack/pages/admin/dashboard.php");
+            }
+            exit;
+        } else {
+            $error = "Invalid username or password.";
+        }
     }
 }
 ?>
@@ -36,13 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="bg-light">
     <div class="container mt-5" style="max-width: 400px;">
         <h2 class="text-center mb-4">MedTrack Login</h2>
-        <?php if (isset($_GET['registered'])): ?>
-            <div class="alert alert-success">Registration successful! Please log in.</div>
-        <?php endif; ?>
-        <?php if (isset($error)): ?>
+        <?php if ($error): ?>
             <div class="alert alert-danger"><?php echo $error; ?></div>
         <?php endif; ?>
         <form method="post" class="card p-4 shadow">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" name="username" required>
