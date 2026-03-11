@@ -1,9 +1,10 @@
 <?php
-// Database configuration
+require_once dirname(__DIR__) . '/functions.php'; // go up one level
+
 $host = 'localhost';
 $dbname = 'medtrack';
-$username = 'root';      // XAMPP default
-$password = '';          // XAMPP default empty
+$username = 'root';
+$password = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
