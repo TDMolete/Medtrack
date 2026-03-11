@@ -109,6 +109,7 @@ if (isset($_SESSION['flash_success'])) {
 }
 
 ob_start();
+include '../includes/header.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -177,4 +178,6 @@ ob_start();
 </html>
 <?php
 ob_end_flush();
+include '../includes/footer.php';
+
 ?>
