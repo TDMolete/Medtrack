@@ -58,21 +58,7 @@
                         <div class="form-text text-muted" id="newsletter-message"></div>
                     </form>
                     <!-- Timeline (Latest Updates) -->
-                    <div class="mt-4">
-                        <h5>Latest Updates</h5>
-                        <div class="timeline-item">
-                            <div class="timeline-date">15 Apr 2025</div>
-                            <div>New chart visualisation for blood pressure.</div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">10 Apr 2025</div>
-                            <div>Export medical history as PDF now available.</div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">05 Apr 2025</div>
-                            <div>Dark mode added!</div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
             <hr class="bg-secondary">

@@ -263,11 +263,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#story">Story</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#reviews">Reviews</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
                     <li class="nav-item"><a class="nav-link" href="auth/login.php">Login</a></li>
                     <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3" href="auth/register.php">Register</a></li>
                 </ul>
@@ -558,18 +553,7 @@
                             <button class="btn btn-primary" type="button">Subscribe</button>
                         </div>
                     </form>
-                    <div class="mt-4">
-                        <h5>Latest Updates</h5>
-                        <div class="timeline-item">
-                            <div class="timeline-date">15 Apr 2025</div>
-                            <div>New chart visualisation for blood pressure.</div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-date">10 Apr 2025</div>
-                            <div>Export medical history as PDF now available.</div>
-                        </div>
-                    </div>
-                </div>
+                                    </div>
             </div>
             <hr class="bg-secondary">
             <div class="text-center">

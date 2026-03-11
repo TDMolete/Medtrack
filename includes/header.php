@@ -49,15 +49,6 @@ define('BASE_URL', '/medtrack/'); // Change if needed
             <div class="collapse navbar-collapse" id="navbarPublic">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>index.php#features">Features</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>index.php#about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>index.php#contact">Contact</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="<?php echo BASE_URL; ?>auth/login.php">Login</a>
                     </li>
                     <li class="nav-item">
